@@ -39,7 +39,7 @@
     :accessor encoder-val)))
 
 (defmethod initialize-instance :after ((new-obj grain) &key)
-  (setf (play-node new-obj) (synth 'grains :buffer (buf new-obj))))
+  (setf (play-node new-obj) (synth 'grains :buffer (buf new-obj) :to *always-on*)))
 
 (defmethod start-rec ((grain grain))
   (with-accessors ((buf buf) (rec-node rec-node))
