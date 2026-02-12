@@ -17,6 +17,12 @@
 			    ((<= 32 cc 35)
 			     (ctrl (play-node (aref *grains* (- cc 32)))
 				   :amp (/ val 127)))
+			    ((= cc 37) ; 6: tremelo
+			     (if (zerop val)
+				 (progn (free *tremelo-node*)
+					(setf *tremelo-node* nil))
+				 (progn (unless *tremelo-node* (setf *tremelo-node* (synth 'tremelo :to *fx-group*)))
+					(ctrl *tremelo-node* :speed (lin-lin val 0 127 0 30)))))
 			    ((= cc 112)
 			     (if (or (zerop val) (= 127 val))
 				 (ping-pong-stop)

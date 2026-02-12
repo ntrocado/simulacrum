@@ -154,3 +154,13 @@
 (defun ping-pong-stop ()
   (mapc (lambda (node) (ctrl node :gate 0)) *ping-pong-nodes*)
   (setf *ping-pong-nodes* nil))
+;;;;
+
+(defparameter *fx-group* (make-group :pos :tail :to 0))
+(defparameter *fx-bus* (bus-audio :chanls 2))
+
+(defsynth tremelo ((speed 5))
+  (replace-out.ar *output-bus*
+		  (* (in.ar *output-bus* 2) (lf-pulse.kr speed))))
+
+(defparameter *tremelo-node* nil)
