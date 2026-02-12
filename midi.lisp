@@ -11,6 +11,8 @@
 			    ;; encoders
 			    ((<= 8 cc 11)
 			     (incf-pos (aref *grains* (- cc 8)) (- val 64)))
+			    ((= cc 15) ; 8: crossfader tanh
+			     (ctrl *generic-ctrl-node* :val (/ val 127)))
 			    ;; faders
 			    ((<= 32 cc 35)
 			     (ctrl (play-node (aref *grains* (- cc 32)))

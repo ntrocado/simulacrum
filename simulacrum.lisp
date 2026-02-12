@@ -3,7 +3,13 @@
 (in-package #:simulacrum)
 
 (defparameter *output-bus* 0)
-(defparameter *always-on* (make-group :pos :head))
+(defparameter *ctrl-bus* (bus-control))
+(defparameter *always-on* (make-group))
+
+(defsynth generic-ctrl (val)
+  (out.kr *ctrl-bus* val))
+
+(defparameter *generic-ctrl-node* (synth 'generic-ctrl :to *always-on*))
 
 (defsynth record (buffer)
   (record-buf.ar (sound-in.ar 0) buffer))
@@ -117,7 +123,8 @@
          (window (expt sine-shape .5))
 
          ;; --- Sound Generation ---
-         (sig (tanh (* 30 (buf-rd.ar 1 buf pointer 1 4))))
+         (sig (tanh (* (lin-lin.kr (in.kr *ctrl-bus*) 0 1 1 40)
+		       (buf-rd.ar 1 buf pointer 1 4))))
 	 (env (env-gen.ar (asr .005 1 .15) :gate gate :act :free)))
 
     (out.ar out (* sig window env amp))))
@@ -136,7 +143,6 @@
 
 (let ((cur-buf -2))
   (defun ping-pong-play ()
-    (print cur-buf)
     (setf cur-buf (mod (+ cur-buf 2) (length *auto-rec-bufs*))
 	  *ping-pong-nodes* (list (synth 'ping-pong :buf (aref *auto-rec-bufs* cur-buf)
 						    :out (first *crossfade-buses*)
