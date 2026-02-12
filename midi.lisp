@@ -9,14 +9,20 @@
 			  (declare (ignore chan))
 			  (cond
 			    ;; encoders
-			    ((<= 8 cc 11)
+			    ((<= 8 cc 11) ; 1-4: grains pos
 			     (incf-pos (aref *grains* (- cc 8)) (- val 64)))
 			    ((= cc 15) ; 8: crossfader tanh
 			     (ctrl *generic-ctrl-node* :val (/ val 127)))
 			    ;; faders
-			    ((<= 32 cc 35)
+			    ((<= 32 cc 35) ; 1-4: grains amp
 			     (ctrl (play-node (aref *grains* (- cc 32)))
 				   :amp (/ val 127)))
+			    ((= cc 36) ; 5: fm
+			     (if (zerop val)
+				 (progn (ctrl *feedback-fm-node* :gate 0)
+					(setf *feedback-fm-node* nil))
+				 (progn (unless *feedback-fm-node* (setf *feedback-fm-node* (synth 'feedback-fm)))
+					(ctrl *feedback-fm-node* :amp (/ val 127)))))
 			    ((= cc 37) ; 6: tremelo
 			     (if (zerop val)
 				 (progn (free *tremelo-node*)

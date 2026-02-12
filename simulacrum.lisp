@@ -154,6 +154,40 @@
 (defun ping-pong-stop ()
   (mapc (lambda (node) (ctrl node :gate 0)) *ping-pong-nodes*)
   (setf *ping-pong-nodes* nil))
+
+;;;;
+
+(defsynth feedback-fm ((gate 1) (amp 0))
+  (let* ((control (in.kr *ctrl-bus*))
+	 (in-freq (first (tartini.kr (sound-in.ar 0))))
+	 (max-speed (range (lf-noise1.kr 1) 2 8))
+	 (freq (+ in-freq
+		  (* (lf-noise0.kr (lin-lin.kr control 0 1 1 max-speed))
+		     (lin-exp.kr control 0 1 0.001 280))))
+	 (mod (sin-osc-fb.ar
+	       (* freq
+		  (range (lf-pulse.kr (range (lf-noise1.kr '(.7 1.1))
+					     .3 1.2))
+			 (range (lf-pulse.kr '(.8 1.3))
+				'(.5 1) '(2 3))
+			 (range (lf-pulse.kr '(.2 .6))
+				3.9 4.1)))))
+	 (car (sin-osc-fb.ar (+ freq mod)
+			     (range (lf-noise1.kr (lf-noise1.kr '(.4 .23 .69) .5 .8))
+				    (* .2 pi) (* .9 pi))))
+	 (env (env-gen.ar (asr .1 1 .2) :gate gate :act :free)))
+    (out.ar *output-bus*
+	    (splay.ar (freeverb.ar (decimator.ar (rlpf.ar car (range (lf-noise0.kr (lin-lin.kr control 0 1 .5 2)) 1600 5000))
+						 (+ (range (lin-lin.kr control 0 1 44100 8000))
+						    (lf-noise1.kr (lin-lin.kr control 0 1 .2 .7)
+								  (lin-exp.kr control 0 1 0.001 1500)))
+						 (range (lin-lin.kr control 0 1 24 6)))
+				   :mix .7 :room .9)
+		      (range (lf-noise1.kr 1) .1 1)
+		      (* amp 3.5 env (env-follow.ar (sound-in.ar 0)))))))
+
+(defparameter *feedback-fm-node* nil)
+
 ;;;;
 
 (defparameter *fx-group* (make-group :pos :tail :to 0))
