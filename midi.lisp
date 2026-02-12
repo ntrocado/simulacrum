@@ -14,18 +14,23 @@
 			    ;; faders
 			    ((<= 32 cc 35)
 			     (ctrl (play-node (aref *grains* (- cc 32)))
-				   :amp (/ val 127))))))
+				   :amp (/ val 127)))
+			    ((= cc 112)
+			     (if (or (zerop val) (= 127 val))
+				 (ping-pong-stop)
+				 (progn (unless *ping-pong-nodes* (ping-pong-play))
+					(ctrl *crossfade-node* :which (/ val 127))))))))
 
 (midi:set-midi-callback *midi-source* :note-on
 			(lambda (chan note vel)
 			  (declare (ignore chan vel))
 			  (cond
-			    ((<= 64 note 67)
+			    ((<= 64 note 67) ; buttons 1-4
 			     (start-rec (aref *grains* (- note 64)))))))
 
 (midi:set-midi-callback *midi-source* :note-off
 			(lambda (chan note vel)
 			  (declare (ignore chan vel))
 			  (cond
-			    ((<= 64 note 67)
+			    ((<= 64 note 67) ; buttons 1-4
 			     (stop-rec (aref *grains* (- note 64)))))))
