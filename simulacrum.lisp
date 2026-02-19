@@ -92,7 +92,7 @@
 		     (start-pos 0)    ;; 0 to 1
 		     (end-pos 1)      ;; 0 to 1
 		     (gate 1)
-		     (amp .5))
+		     (amp .3))
   (let* ((total-frames (buf-frames.ir buf))
          (start-frame (* start-pos total-frames))
          (end-frame (* end-pos total-frames))
