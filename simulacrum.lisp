@@ -139,8 +139,6 @@
 
 (defparameter *ping-pong-nodes* nil)
 
-(defsynth foo (out) (out.ar out (sin-osc.ar 220 0 .2)))
-
 (let ((cur-buf -2))
   (defun ping-pong-play ()
     (setf cur-buf (mod (+ cur-buf 2) (length *auto-rec-bufs*))
