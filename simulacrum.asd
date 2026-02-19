@@ -9,4 +9,5 @@
   :depends-on (#:cl-collider #:coremidi)
   :components ((:file "package")
 	       (:file "setup")
+	       (:file "midi")
                (:file "simulacrum")))
